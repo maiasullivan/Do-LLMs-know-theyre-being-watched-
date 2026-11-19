@@ -1,0 +1,20 @@
+[project]
+name = "eap"
+version = "0.1.0"
+description = "Probing small open-weight LLMs for evaluation awareness"
+requires-python = ">=3.12"
+dependencies = [
+    "accelerate>=1.16.0",
+    "anthropic>=2.10.0",
+    "datasets>=5.2.0",
+    "matplotlib>=3.11.2",
+    "pandas>=3.1.1",
+    "python-dotenv>=1.2.4",
+    "scikit-learn>=1.9.1",
+    "torch>=2.15.0",
+    "transformers>=5.23.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.8,<0.14.0"]
+build-backend = "uv_build"
