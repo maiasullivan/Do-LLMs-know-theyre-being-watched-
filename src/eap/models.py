@@ -19,6 +19,8 @@ class ModelConfig:
     dtype: torch.dtype = torch.bfloat16
     # Extra kwargs passed to tokenizer.apply_chat_template.
     chat_template_kwargs: dict = field(default_factory=dict)
+    # Dotted path from the loaded model to its decoder-layer ModuleList (used for steering hooks).
+    layers_path: str = "model.layers"
     gated: bool = False
     notes: str = ""
 
@@ -37,6 +39,7 @@ MODELS: dict[str, ModelConfig] = {
         hf_id="google/gemma-3-4b-it",
         revision="093f9f388b31de276ce2de164bdc2081324b9767",
         # bf16 only: Gemma can overflow to NaN in fp16.
+        layers_path="model.language_model.layers",
         gated=True,
         notes="Multimodal checkpoint (Gemma3ForConditionalGeneration); we use text only. "
         "Gemma 4 E4B is ~8B total params (~16 GB bf16), too big for a 16 GB Mac.",
@@ -90,3 +93,30 @@ def chat_prompt(tok, cfg: ModelConfig, user_message: str) -> str:
         add_generation_prompt=True,
         **cfg.chat_template_kwargs,
     )
+
+
+def encode_with_user_mask(tok, cfg: ModelConfig, user_message: str):
+    """Tokenise a chat-templated single user turn.
+
+    Returns (input_ids [1, seq], user_mask [seq] bool). The mask is True only for tokens that lie
+    inside the user's message text, which excludes system blocks (e.g. Llama's date), role tags
+    and generation-prompt tokens (e.g. Qwen's empty think block).
+    """
+    user_message = user_message.strip()  # some templates trim content
+    text = chat_prompt(tok, cfg, user_message)
+    start = text.rfind(user_message)
+    if start < 0:
+        raise ValueError("user message not found verbatim in templated prompt")
+    end = start + len(user_message)
+    enc = tok(text, return_tensors="pt", add_special_tokens=False, return_offsets_mapping=True)
+    offsets = enc.pop("offset_mapping")[0]
+    mask = (offsets[:, 0] < end) & (offsets[:, 1] > start)
+    return enc["input_ids"], mask
+
+
+def decoder_layers(model, cfg: ModelConfig):
+    """The model's decoder-layer ModuleList, following cfg.layers_path."""
+    obj = model
+    for attr in cfg.layers_path.split("."):
+        obj = getattr(obj, attr)
+    return obj

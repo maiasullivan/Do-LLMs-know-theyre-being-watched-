@@ -27,4 +27,8 @@ All prompts are synthetic or come from public benchmarks.
 
 ## Status
 
-- **Phase 0 (setup):** done for `qwen3-4b` on Apple M1 Pro (MPS, bf16). Hidden states have shape (37, seq, 2560) with no NaNs, and greedy output is sensible. Gemma and Llama are waiting on HF gated access.
+- **Phase 0 (setup):** done for all three models on Apple M1 Pro (MPS, bf16). Hidden-state shapes are correct with no NaNs, and the user-token mask covers exactly the user message (Llama's date block and Qwen's empty think block are excluded). Decoder-layer paths are verified.
+  - Qwen3-4B: 36 layers, d_model 2560
+  - Gemma 3 4B: 34 layers, d_model 2560 (loads as `Gemma3ForConditionalGeneration`)
+  - Llama 3.2 3B: 28 layers, d_model 3072
+- **Phase 1 (dataset):** pipeline rebuilt for the factorial design (label × format × register, 6 template families per cell, split 4/2, tasks split 70/30) plus the explicit and benchmark sets. Dry-run passes on placeholder data, including the keyword grep. Waiting on an API key to generate the real tasks, contexts and benchmark rewrites.
