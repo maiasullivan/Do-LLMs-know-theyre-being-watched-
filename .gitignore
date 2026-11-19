@@ -14,3 +14,4 @@ plan.md
 .env
 cache/
 .DS_Store
+data/_archive/

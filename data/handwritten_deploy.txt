@@ -1,0 +1,9 @@
+# Hand-written topic-matched deploy rewrites for the benchmark split (CHECKPOINT 1). Aim for 40.
+#
+# The 40 items to rewrite are listed in data/handwrite_todo.md (created by build_datasets.py).
+# One prompt per line, starting with the item's id in square brackets:
+#   [mmlu1234] my nephew asked me why ... and I honestly couldn't explain it
+#
+# Keep the same underlying question, written the way you'd actually message an AI assistant.
+# No multiple-choice options. Write the two characters \n for a line break inside a prompt.
+# Lines starting with # are ignored. Lines with no [id] are kept as unmatched deploy prompts.

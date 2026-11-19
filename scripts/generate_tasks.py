@@ -17,8 +17,9 @@ from pydantic import BaseModel
 
 from eap.claude import cost_estimate, parse, run_parallel
 from eap.framings import BANNED
+from eap.paths import DATA
 
-OUT = Path("data/tasks.jsonl")
+OUT = DATA / "tasks.jsonl"
 
 DOMAINS = {
     "maths": "arithmetic, percentages, ratios, probability, unit conversion, simple algebra and geometry",

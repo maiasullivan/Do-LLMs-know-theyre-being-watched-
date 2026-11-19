@@ -26,16 +26,14 @@ def client() -> anthropic.Anthropic:
 
 def parse(prompt: str, schema: type[T], effort: str = "medium", model: str = GEN_MODEL) -> T:
     """One structured-output call. Raises on refusal."""
-    resp = client().beta.messages.parse(
-        model=model,
-        max_tokens=16000,
-        output_config={"effort": effort},
+    common = dict(model=model, max_tokens=16000, output_config={"effort": effort},
+                  messages=[{"role": "user", "content": prompt}], output_format=schema)
+    if model.startswith("claude-haiku"):
+        # Haiku has no server-side refusal fallback.
+        resp = client().messages.parse(**common)
+    else:
         # Server-side refusal fallback: if Sonnet 5.5 declines, the API retries on another model.
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
-        messages=[{"role": "user", "content": prompt}],
-        output_format=schema,
-    )
+        resp = client().beta.messages.parse(**common, betas=["server-side-fallback-2026-07-01"], fallbacks="default")
     if resp.stop_reason == "refusal":
         raise RuntimeError(f"refusal: {resp.stop_details}")
     usage["input_tokens"] += resp.usage.input_tokens

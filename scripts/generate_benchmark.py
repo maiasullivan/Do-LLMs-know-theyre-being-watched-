@@ -22,8 +22,9 @@ from pydantic import BaseModel
 
 from eap.claude import cost_estimate, parse, run_parallel
 from eap.framings import BANNED
+from eap.paths import DATA
 
-OUT = Path("data/benchmark_items.jsonl")
+OUT = DATA / "benchmark_items.jsonl"
 SEED = 0
 N = {"mmlu": 35, "truthfulqa": 30, "gsm8k": 35}
 N_PARAPHRASE, N_HANDWRITE = 40, 40
