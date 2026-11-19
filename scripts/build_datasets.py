@@ -246,6 +246,14 @@ def main() -> None:
     tasks = {t["id"]: t for t in read_jsonl(DATA / "tasks.jsonl")}
     contexts = read_jsonl(DATA / "contexts.jsonl")
     items = read_jsonl(DATA / "benchmark_items.jsonl")
+    # Run 3: deploy contexts under the old "no I/my/me" rule were third-person narration (reads as
+    # synthetic). fix_deploy_voice.py rewrote them; drop any task it couldn't fix.
+    unfixed = sorted(c["task_id"] for c in contexts
+                     if any(c["contexts"][k].get("voice") and c["contexts"][k].get("fixed") != "voice-v3"
+                            for k in ("deploy_formal", "deploy_casual")))
+    if unfixed:
+        print(f"WARNING: dropping {len(unfixed)} tasks with unfixed third-person deploy contexts: {unfixed}")
+        contexts = [c for c in contexts if c["task_id"] not in set(unfixed)]
     bridges = {b["task_id"]: b for b in read_jsonl(DATA / "bridges.jsonl")}
     no_bridge = sorted(c["task_id"] for c in contexts if c["task_id"] not in bridges)
     if no_bridge:
