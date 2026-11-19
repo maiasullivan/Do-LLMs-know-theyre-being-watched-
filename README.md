@@ -27,4 +27,4 @@ All prompts are synthetic or come from public benchmarks.
 
 ## Status
 
-- **Phase 0 (setup):** in progress.
+- **Phase 0 (setup):** done for `qwen3-4b` on Apple M1 Pro (MPS, bf16). Hidden states have shape (37, seq, 2560) with no NaNs, and greedy output is sensible. Gemma and Llama are waiting on HF gated access.
